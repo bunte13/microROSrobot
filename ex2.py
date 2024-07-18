@@ -86,7 +86,7 @@ class laserTracker(Node):
         
         print(f"minDist: {minDist}, minDistID: {minDistID}")
         
-        if self.Joy_active or self.Switch == True:
+        if self.Joy_active or self.Switch:
             if self.Moving:
                 self.pub_vel.publish(Twist())
                 self.Moving = False
@@ -120,8 +120,7 @@ def main():
     try:
         rclpy.spin(laser_tracker)
     except KeyboardInterrupt:
-        pass
-    finally:
+        print("Shutting down node...")
         laser_tracker.exit_pro()
         laser_tracker.destroy_node()
         rclpy.shutdown()
