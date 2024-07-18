@@ -2,7 +2,7 @@ import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan
-from std_msgs.msg import Bool  # Import Bool message type
+from std_msgs.msg import Bool
 import os
 import math
 import numpy as np
@@ -83,30 +83,35 @@ class laserTracker(Node):
         else:
             minDist = min(minDistList)
             minDistID = minDistIDList[minDistList.index(minDist)]
-            
+        
+        print(f"minDist: {minDist}, minDistID: {minDistID}")
+        
         if self.Joy_active or self.Switch == True:
-            if self.Moving == True:
+            if self.Moving:
                 self.pub_vel.publish(Twist())
-                self.Moving = not self.Moving
+                self.Moving = False
             return
         
-        self.Moving = True
-        velocity = Twist()
-        print("minDist: ", minDist)
-        if abs(minDist - self.ResponseDist) < 0.1: minDist = self.ResponseDist
-        
-        # Check if the closest object is within ±20 degrees
         if abs(minDistID) <= 20:
-            velocity.linear.x = 0.0  # Do not move linearly
-            velocity.angular.z = 0.0  # Do not rotate
+            # Object is within ±20 degrees
+            print("Object is within ±20 degrees, stopping movement.")
+            velocity = Twist()
+            velocity.linear.x = 0.0
+            velocity.angular.z = 0.0
+            self.pub_vel.publish(velocity)
+            self.Moving = False
         else:
+            # Object is outside ±20 degrees
+            self.Moving = True
+            velocity = Twist()
+            if abs(minDist - self.ResponseDist) < 0.1:
+                minDist = self.ResponseDist
             velocity.linear.x = -self.lin_pid.pid_compute(self.ResponseDist, minDist)
             velocity.angular.z = self.ang_pid.pid_compute(minDistID / 48, 0)
-            
-        if abs(velocity.angular.z) < 0.1:
-            velocity.angular.z = 0.0
-
-        self.pub_vel.publish(velocity)
+            if abs(velocity.angular.z) < 0.1:
+                velocity.angular.z = 0.0
+            self.pub_vel.publish(velocity)
+            print(f"Publishing velocities: linear.x = {velocity.linear.x}, angular.z = {velocity.angular.z}")
 
 def main():
     rclpy.init()
