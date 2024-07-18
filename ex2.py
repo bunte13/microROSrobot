@@ -2,11 +2,11 @@ import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan
-from std_msgs.msg import Bool
+
 import os
 import math
 import numpy as np
-from yahboomcar_laser.common import SinglePID
+from yahboomcar_laser.common import *
 
 print("import done")
 RAD2DEG = 180 / math.pi
@@ -22,16 +22,17 @@ class laserTracker(Node):
 
         # declare parameters
         self.declare_parameter("priorityAngle", 30.0)
-        self.declare_parameter("LaserAngle", 90.0)
-        self.declare_parameter("ResponseDist", 0.55)
-        self.declare_parameter("Switch", False)
-
-        # initialize parameters
         self.priorityAngle = self.get_parameter('priorityAngle').get_parameter_value().double_value
+        self.declare_parameter("LaserAngle", 90.0)
         self.LaserAngle = self.get_parameter('LaserAngle').get_parameter_value().double_value
+        self.declare_parameter("ResponseDist", 0.55)
         self.ResponseDist = self.get_parameter('ResponseDist').get_parameter_value().double_value
+        self.declare_parameter("Switch", False)
         self.Switch = self.get_parameter('Switch').get_parameter_value().bool_value
 
+        # initialize parameters
+        
+        
         self.Right_warning = 0
         self.Left_warning = 0
         self.front_warning = 0
@@ -42,25 +43,12 @@ class laserTracker(Node):
         self.ang_pid = SinglePID(3.0, 0.0, 5.0)
 
         self.timer = self.create_timer(0.01, self.on_timer)
-        
-        # Add a callback for parameter changes
-        self.add_on_set_parameters_callback(self.parameter_callback)
 
     def on_timer(self):
-        # Parameter values are updated via the parameter callback
-        pass
-
-    def parameter_callback(self, params):
-        for param in params:
-            if param.name == 'priorityAngle':
-                self.priorityAngle = param.value
-            elif param.name == 'LaserAngle':
-                self.LaserAngle = param.value
-            elif param.name == 'ResponseDist':
-                self.ResponseDist = param.value
-            elif param.name == 'Switch':
-                self.Switch = param.value
-        return rclpy.parameter.ParameterDescriptor()
+        self.Switch = self.get_parameter('Switch').get_parameter_value().bool_value
+        self.priorityAngle = self.get_parameter('priorityAngle').get_parameter_value().double_value
+        self.LaserAngle = self.get_parameter('LaserAngle').get_parameter_value().double_value
+        self.ResponseDist = self.get_parameter('ResponseDist').get_parameter_value().double_value
 
     def JoyStateCallback(self, msg):
         if not isinstance(msg, Bool): return
@@ -101,10 +89,10 @@ class laserTracker(Node):
             
         print(f"minDist: {minDist}, minDistID: {minDistID}")
         
-        if self.Joy_active or self.Switch:
-            if self.Moving:
+        if self.Joy_active or self.Switch == True:
+            if self.Moving ==True:
                 self.pub_vel.publish(Twist())
-                self.Moving = False
+                self.Moving = not self.Moving
             return
         
         # Add print statements to debug the angle condition
@@ -142,5 +130,4 @@ def main():
         laser_tracker.destroy_node()
         rclpy.shutdown()
 
-if __name__ == '__main__':
-    main()
+
