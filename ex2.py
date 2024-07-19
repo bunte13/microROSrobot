@@ -98,7 +98,7 @@ class laserTracker(Node):
         print(f"Checking if {abs(minDistID)} <= 40", flush=True)
         if abs(minDistID) <= 40:
             if abs(minDist - self.ResponseDist) > 0.1:
-                print("Object is within ±40 degrees and not at the desired distance, adjusting movement.", flush=True)
+                print("Object is within 40 degrees and not at the desired distance, adjusting movement.", flush=True)
                 velocity = Twist()
                 velocity.linear.x = self.lin_pid.pid_compute(self.ResponseDist, minDist)
                 velocity.angular.z = self.ang_pid.pid_compute(minDistID / 48, 0)
@@ -107,7 +107,7 @@ class laserTracker(Node):
                 self.pub_vel.publish(velocity)
                 self.Moving = True
             else:
-                print("Object is within ±40 degrees and at the desired distance, stopping movement.", flush=True)
+                print("Object is within 40 degrees and at the desired distance, stopping movement.", flush=True)
                 velocity = Twist()
                 velocity.linear.x = 0.0
                 velocity.angular.z = 0.0
