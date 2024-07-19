@@ -55,10 +55,11 @@ class laserTracker(Node):
         self.Joy_active = msg.data
 
     def exit_pro(self):
-        cmd1 = "ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist "
-        cmd2 = '''"{linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}"'''
-        cmd = cmd1 + cmd2
-        os.system(cmd)
+        velocity = Twist()
+        velocity.linear.x = 0.0
+        velocity.angular.z = 0.0
+        self.pub_vel.publish(velocity)
+        rclpy.shutdown()
 
     def registerScan(self, scan_data):
         if not isinstance(scan_data, LaserScan): return
