@@ -2,6 +2,7 @@ import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan
+from std_msgs.msg import Bool
 
 import os
 import math
@@ -21,9 +22,9 @@ class laserTracker(Node):
         self.pub_vel = self.create_publisher(Twist, '/cmd_vel', 1)
 
         # declare parameters
-        self.declare_parameter("priorityAngle", 30.0)
+        self.declare_parameter("priorityAngle", 60.0)
         self.priorityAngle = self.get_parameter('priorityAngle').get_parameter_value().double_value
-        self.declare_parameter("LaserAngle", 90.0)
+        self.declare_parameter("LaserAngle", 120.0)
         self.LaserAngle = self.get_parameter('LaserAngle').get_parameter_value().double_value
         self.declare_parameter("ResponseDist", 0.55)
         self.ResponseDist = self.get_parameter('ResponseDist').get_parameter_value().double_value
@@ -31,8 +32,6 @@ class laserTracker(Node):
         self.Switch = self.get_parameter('Switch').get_parameter_value().bool_value
 
         # initialize parameters
-        
-        
         self.Right_warning = 0
         self.Left_warning = 0
         self.front_warning = 0
@@ -96,17 +95,17 @@ class laserTracker(Node):
             return
         
         # Add print statements to debug the angle condition
-        print(f"Checking if {abs(minDistID)} <= 20")
-        if abs(minDistID) <= 20:
-            # Object is within ±20 degrees
-            print("Object is within ±20 degrees, stopping movement.")
+        print(f"Checking if {abs(minDistID)} <= 40", flush=True)
+        if abs(minDistID) <= 40:
+            # Object is within +/-20 degrees
+            print("Object is within 40 degrees, stopping movement.", flush=True)
             velocity = Twist()
             velocity.linear.x = 0.0
             velocity.angular.z = 0.0
             self.pub_vel.publish(velocity)
             self.Moving = False
         else:
-            # Object is outside ±20 degrees
+            # Object is outside +/-20 degrees
             self.Moving = True
             velocity = Twist()
             if abs(minDist - self.ResponseDist) < 0.1:
@@ -129,5 +128,4 @@ def main():
         laser_tracker.exit_pro()
         laser_tracker.destroy_node()
         rclpy.shutdown()
-
 
