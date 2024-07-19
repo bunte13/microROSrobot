@@ -22,9 +22,9 @@ class laserTracker(Node):
         self.pub_vel = self.create_publisher(Twist, '/cmd_vel', 1)
 
         # declare parameters
-        self.declare_parameter("priorityAngle", 60.0)
+        self.declare_parameter("priorityAngle", 50.0)
         self.priorityAngle = self.get_parameter('priorityAngle').get_parameter_value().double_value
-        self.declare_parameter("LaserAngle", 120.0)
+        self.declare_parameter("LaserAngle", 100.0)
         self.LaserAngle = self.get_parameter('LaserAngle').get_parameter_value().double_value
         self.declare_parameter("ResponseDist", 0.55)
         self.ResponseDist = self.get_parameter('ResponseDist').get_parameter_value().double_value
@@ -95,19 +95,24 @@ class laserTracker(Node):
                 self.Moving = not self.Moving
             return
         
-        print(f"Checking if {abs(minDistID)} <= 40", flush=True)
-        if abs(minDistID) <= 40:
+        print(f"Checking if {abs(minDistID)} <= 30", flush=True)
+        if abs(minDistID) <= 30:
             if abs(minDist - self.ResponseDist) > 0.1:
-                print("Object is within 40 degrees and not at the desired distance, adjusting movement.", flush=True)
+                print("Object is within +/-30 degrees and not at the desired distance, adjusting movement.", flush=True)
                 velocity = Twist()
-                velocity.linear.x = self.lin_pid.pid_compute(self.ResponseDist, minDist)
+                if minDist > self.ResponseDist:
+                    # Move forward if the object is too far
+                    velocity.linear.x = self.lin_pid.pid_compute(minDist, self.ResponseDist)
+                else:
+                    # Move backward if the object is too close
+                    velocity.linear.x = -self.lin_pid.pid_compute(self.ResponseDist, minDist)
                 velocity.angular.z = self.ang_pid.pid_compute(minDistID / 48, 0)
                 if abs(velocity.angular.z) < 0.1:
                     velocity.angular.z = 0.0
                 self.pub_vel.publish(velocity)
                 self.Moving = True
             else:
-                print("Object is within 40 degrees and at the desired distance, stopping movement.", flush=True)
+                print("Object is within ±40 degrees and at the desired distance, stopping movement.", flush=True)
                 velocity = Twist()
                 velocity.linear.x = 0.0
                 velocity.angular.z = 0.0
@@ -119,7 +124,7 @@ class laserTracker(Node):
             velocity = Twist()
             if abs(minDist - self.ResponseDist) < 0.1:
                 minDist = self.ResponseDist
-            velocity.linear.x = -self.lin_pid.pid_compute(self.ResponseDist, minDist)
+            velocity.linear.x = self.lin_pid.pid_compute(minDist, self.ResponseDist)
             velocity.angular.z = self.ang_pid.pid_compute(minDistID / 48, 0)
             if abs(velocity.angular.z) < 0.1:
                 velocity.angular.z = 0.0
@@ -137,3 +142,4 @@ def main():
         laser_tracker.exit_pro()
         laser_tracker.destroy_node()
         rclpy.shutdown()
+
