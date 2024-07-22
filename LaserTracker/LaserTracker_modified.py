@@ -113,14 +113,14 @@ class laserTracker(Node):
                 self.pub_vel.publish(velocity)
                 self.Moving = True
             else:
-                print("Object is within ±40 degrees and at the desired distance, stopping movement.", flush=True)
+                print("Object is within +/- 30 degrees and at the desired distance, stopping movement.", flush=True)
                 velocity = Twist()
                 velocity.linear.x = 0.0
                 velocity.angular.z = 0.0
                 self.pub_vel.publish(velocity)
                 self.Moving = False
         else:
-            # Object is outside ±40 degrees
+            # Object is outside +/-30 degrees
             self.Moving = True
             velocity = Twist()
             if abs(minDist - self.ResponseDist) < 0.1:

@@ -1,0 +1,19 @@
+This robot percieves the surrouning area using the lidar sensor within a certain degree angle
+the degrees are beeing calculated from the front of the robot clockwise,
+Once it reaches 180 degrees, the angle is calculated as  angle = 360 - angle, which means the robot makes calculations from 0 to 180 to the right,
+and from 0 to - 180 to the left.
+this way we can set the Priorityangle and the LaserAngle using abs(). - absolute value
+PriorityAngle is the angle to which the robot will adjust itself within the newly added modification***
+LaserAngle is the angle which it will register the objects
+
+Modification added:
+
+the robot will not move its wheels while the nearest object is withing abs(30 degrees)
+
+This means that once the robot has positioned himself within 30 degrees of the nearest object, we can activate function: mono_Tracker.py
+,select the nearest object and follow it.
+
+This way we could monitor the object more precisely using just the camera within those 30 degrees,
+once the object has left thise 30 degrees a message to the wheel nodes will be sent to reposition themselves, and the object will once again be in 
+the camera's site.
+
