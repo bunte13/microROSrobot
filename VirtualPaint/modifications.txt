@@ -1,0 +1,11 @@
+Modifications added:
+
+1.user can now select the thickness of the brush and the eraser by spreading his index finger and middle finger.
+
+2.while adjusting the thickness the rectangle that appeared before between the fingers is dismissed,
+instead ,now there is a circle which's radius is adjusted dynamically and corresponds with the thickness of the brush/eraser.This way you will know
+the thickness of the brush you are working with.
+
+4.Added an undo function where in imgCanvasHistory[] every addition of the screen while drawing is placed and can be undone by clicking "u".
+
+5.Also now the screen is flipped for a better user-friendly experience.
