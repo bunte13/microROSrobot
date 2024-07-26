@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # encoding: utf-8
-""" Section for intitialising essentioal libraries """
+""" Section for intitialising essential libraries """
 
 import math  # * Importing the math module for mathematical functions
 import time  # * Importing the time module for handling time-related tasks
